@@ -1,4 +1,4 @@
-resource "aws_security_group" "allow_ssh_terraform"{
+resource "aws_security_group" "allow_ssh_terraform" {
     name   =  "allow_ssh" 
     description =  "Allow port number 22 for SSH access"
 

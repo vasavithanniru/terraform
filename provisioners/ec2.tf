@@ -5,13 +5,19 @@ resource "aws_security_group" "ssh_terraform" {
     egress {
         from_port = 0 
         to_port = 0 
-        protocol = "tcp" 
+        protocol = "-1" 
         cidr_blocks = ["0.0.0.0/0"]
     }
 
     ingress {
         from_port = 22 
         to_port = 22
+        protocol = "tcp" 
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    ingress {
+        from_port = 80
+        to_port = 80
         protocol = "tcp" 
         cidr_blocks = ["0.0.0.0/0"]
     }
@@ -30,7 +36,7 @@ resource "aws_instance" "terraform" {
     }
 
     provisioner "local-exec" {
-        command = "bash -c 'echo ${self.private_ip} > private_ip.txt'"
+      command = "echo ${self.private_ip} > private_ip.txt"
     }
 
     connection {
@@ -38,6 +44,21 @@ resource "aws_instance" "terraform" {
         user     = "ec2-user"
         password = "DevOps321"
         host     = self.public_ip
+    }
+
+    provisioner "remote-exec" {
+        inline = [
+            "sudo dnf install ansible -y",
+            "sudo dnf install nginx -y",
+            "sudo systemctl start nginx",
+        ]
+    }
+
+    provisioner "remote-exec" {
+        when = destroy 
+        inline = [
+            " sudo systemctl stop nginx",   
+          ]
     }
 
 }
